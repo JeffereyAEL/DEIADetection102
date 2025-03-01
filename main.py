@@ -1,3 +1,4 @@
+import time
 import tkinter
 import tkinter as tk
 import csv
@@ -224,20 +225,20 @@ if __name__ == "__main__":
         global email_field, school_field, zipcode_field, description_field, submit_button, submission_button
         elements_button.config(state=tk.DISABLED)
         try:
-            email_field = WebDriverWait(driver, 5).until(
+            email_field = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.XPATH, EMAIL_INPUT))
             )
             print(type(email_field))
-            school_field = WebDriverWait(driver, 5).until(
+            school_field = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.XPATH, SCHOOL_INPUT))
             )
-            zipcode_field = WebDriverWait(driver, 5).until(
+            zipcode_field = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.XPATH, ZIPCODE_INPUT))
             )
-            description_field = WebDriverWait(driver, 5).until(
+            description_field = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.XPATH, DESCRIPTION_INPUT))
             )
-            submit_button = WebDriverWait(driver, 5).until(
+            submit_button = WebDriverWait(driver, 1).until(
                 EC.presence_of_element_located((By.XPATH, SUBMIT_BUTTON))
             )
             elements_button.config(text="Elements Loaded", state=tk.DISABLED)
@@ -280,6 +281,7 @@ if __name__ == "__main__":
             firefox_path_entry.Element.config(state=tk.DISABLED)
             elements_button.config(text="Load Elements", state=tk.NORMAL)
             firefox_button.config(text="Reload FireFox", state=tk.NORMAL)
+            reset_button.config(state=tk.NORMAL)
             try_load_elements()
         except:
             debug_error("Invalid FireFox path")
@@ -369,10 +371,9 @@ if __name__ == "__main__":
     row_idx += 4
 
     def reset_forum() -> None:
-        global email_entry, description_entry
-        email_entry.clear()
-        description_entry.clear()
-        fill_school_info(get_related_school_row())
+        global email_entry, description_entry, driver
+        driver.get("https://enddei.ed.gov/")
+        try_load_elements()
 
     def new_school() -> None:
         fill_school_info(get_related_school_row())
@@ -399,16 +400,18 @@ if __name__ == "__main__":
             school_field.send_keys(school_label.cget("text").strip())
             zipcode_field.send_keys(zipcode_label.cget("text").strip())
             description_field.send_keys(description_entry.get_stripped())
+            time.sleep(0.25)
             driver.execute_script("arguments[0].click();", submit_button)
         except:
             debug_error("Submission Failed. Click 'Reload Elements' in the top right")
             elements_button.config(state=tk.NORMAL, text="Reload Elements")
 
-    reset_button = tk.Button(root, text="Reset Forum", command=reset_forum, font=OPEN_DYSLEXIC_FONT)
+    reset_button = tk.Button(root, text="Reload Page", command=reset_forum, font=OPEN_DYSLEXIC_FONT)
+    reset_button.config(state=tk.DISABLED)
     reset_button.grid(column=0, columnspan=30, row=row_idx, sticky="nsew", padx=4, pady=4)
 
-    reset_button = tk.Button(root, text="New School", command=new_school, font=OPEN_DYSLEXIC_FONT)
-    reset_button.grid(column=40, columnspan=30, row=row_idx, sticky="nsew", padx=4, pady=4)
+    school_button = tk.Button(root, text="New School", command=new_school, font=OPEN_DYSLEXIC_FONT)
+    school_button.grid(column=40, columnspan=30, row=row_idx, sticky="nsew", padx=4, pady=4)
 
     submission_button = tk.Button(root, text="Submit", command=submit_info, font=OPEN_DYSLEXIC_FONT)
     submission_button.config(state=tk.DISABLED)
